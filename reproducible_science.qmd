@@ -58,6 +58,17 @@ bm_vs_fl_scatterplot <- ggplot(data = body_mass_vs_flipper_length,
 bm_vs_fl_scatterplot
 ```
 
+1.1.1 Saving vectored figure
+
+```{r, results="hide, warning=FALSE"}
+ggsave(here("figures", "bm_vs_fl_vector.svg"),
+       plot = bm_vs_fl_scatterplot,
+       device = svglite,
+       width = 20,
+       height = 20)
+
+```
+
 #### 1.2 Write about how your design choices mislead the reader about the underlying data (100-300 words)
 
 ### Question 2: Data Pipeline
