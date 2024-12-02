@@ -1,12 +1,10 @@
 ---
-title: "Reproducible Science"
+title: "Reproducible Science and Figures Assignment"
 format: html
 editor: visual
 ---
 
-# Reproducible Science and Figures Assignment
-
-### Loading the data:
+### Data preparation:
 
 ```{r}
 library(tidyverse)
@@ -18,32 +16,48 @@ library(ggplot2)
 source(here("functions", "cleaning.R"))
 ```
 
+#### Loading the data:
+
 ```{r}
 write.csv(penguins_raw, here("data", "penguins_raw.csv"))
-
-colnames(penguins_raw)
 ```
 
-### Cleaning the data:
+#### Cleaning the data:
 
 ```{r}
-penguins_clean <- penguins_raw %>% 
-  select(-Comments) %>% 
-  select(-starts_with("Delta")) %>% 
-  clean_names() # uses janitor package to put column names in computer and human readable "snake case"
-
-colnames(penguins_clean)
-
+penguins_clean <- penguins_raw %>%
+  clean_column_names() %>%
+  remove_columns(c("comments", "delta")) %>%
+  shorten_species() %>%
+  remove_empty_columns_rows()
 ```
 
-### Saving the cleaned data:
+#### Saving the cleaned data:
 
 ```{r}
 write_csv(penguins_clean, here("data", "penguins_clean.csv"))
 ```
 
-### QUESTION 01: Data Visualisation for Science Communication
+### Question 1: Data Visualisation for Science Communication
 
 #### a) Provide your figure here:
 
-#### 
+#### b) Write about how your design choices mislead the reader about the underlying data (100-300 words)
+
+### 
+
+### Question 2: Data Pipeline
+
+#### Introduction
+
+The Palmer Penguins dataset contains information about 3 different penguin species (Adelie, Chinstrap, and Gentoo) which inhabit 3 islands (Biscoe, Dream, and Torgersen) of the Palmer Archipelago in Antarctica. The dataset contains information about individual penguins, including species and the island they are found on. It also includes phenotypic information like sex, morphological measurements, and reproductive information.
+
+#### Hypothesis
+
+#### Statistical methods
+
+#### Results & Discussion
+
+#### Conclusion
+
+### Question 3: Open Science
