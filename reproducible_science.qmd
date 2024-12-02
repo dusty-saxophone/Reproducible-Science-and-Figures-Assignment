@@ -4,4 +4,46 @@ format: html
 editor: visual
 ---
 
-## 
+# Reproducible Science and Figures Assignment
+
+### Loading the data:
+
+```{r}
+library(tidyverse)
+library(palmerpenguins)
+library(janitor)
+library(here)
+library(ggplot2)
+
+source(here("functions", "cleaning.R"))
+```
+
+```{r}
+write.csv(penguins_raw, here("data", "penguins_raw.csv"))
+
+colnames(penguins_raw)
+```
+
+### Cleaning the data:
+
+```{r}
+penguins_clean <- penguins_raw %>% 
+  select(-Comments) %>% 
+  select(-starts_with("Delta")) %>% 
+  clean_names() # uses janitor package to put column names in computer and human readable "snake case"
+
+colnames(penguins_clean)
+
+```
+
+### Saving the cleaned data:
+
+```{r}
+write_csv(penguins_clean, here("data", "penguins_clean.csv"))
+```
+
+### QUESTION 01: Data Visualisation for Science Communication
+
+#### a) Provide your figure here:
+
+#### 
