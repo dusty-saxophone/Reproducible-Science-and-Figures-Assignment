@@ -44,8 +44,6 @@ write_csv(penguins_clean, here("data", "penguins_clean.csv"))
 
 #### 1.2 Write about how your design choices mislead the reader about the underlying data (100-300 words)
 
-### 
-
 ### Question 2: Data Pipeline
 
 #### 2.1 Introduction
@@ -72,7 +70,7 @@ species_colours <- c("Adelie" = "darkorange",
                      "Gentoo" = "cyan4")
 # matching species with the colours of the dataset
 
-culmen_length_violinplot <- ggplot(
+exploring_culmen_length <- ggplot(
   data = penguins_clean %>% drop_na(),
   aes(x = species,
       y = culmen_length_mm)) +
@@ -93,17 +91,17 @@ culmen_length_violinplot <- ggplot(
   labs(x = "Species", y = "Culmen Length (mm)") +
   theme_bw()
 
-culmen_length_violinplot
+exploring_culmen_length
 ```
 
 ::: {.callout-note icon="false"}
 ## Hypotheses
 
-Looking at the data on culmen length it would be interesting to determine whether different species have significant differences.
+Looking at the data on **culmen length**, it would be interesting to determine whether **different species** have significant differences.
 
-Null hypothesis - No difference in culmen length between species
+**Null hypothesis** - No difference in culmen length between species
 
-Alternative hypothesis - there is a significant difference in culmen length between species
+**Alternative hypothesis** - There is a significant difference in culmen length between species
 :::
 
 #### 2.3 Statistical methods
@@ -116,11 +114,71 @@ shapiro_test <- shapiro.test(culmen_length$culmen_length_mm)
 shapiro_test
 ```
 
-The null hypothesis of the Shapiro-Wilk test is the data is drawn from a normally distributed population. As **p \< 0.05** there is sufficient evidence to reject the null hypothesis and so culmen length is **not normally distributed**.
+The null hypothesis of the Shapiro-Wilk test is the data is drawn from a normally distributed population. As **p \< 0.05**, there is sufficient evidence to reject the null hypothesis and so culmen length is **not normally distributed**.
 
 This can be visualised using a qqplot:
 
+```{r}
+qqnorm(culmen_length$culmen_length_mm)
+qqline(culmen_length$culmen_length_mm, col = "red")
+```
+
+2.3.2 Kruskal-Wallis test
+
+As culmen length is not normally distributed, a non-parametric method is required to test differences between species. The **Kruskal-Wallis** test determines whether there are significant differences between the medians of two or more groups. It requires a numerical response variable (culmen length) and a categorical explanatory variable (species).
+
+```{r}
+kruskal <- kruskal.test(data = culmen_length, culmen_length_mm ~ species)
+
+kruskal
+```
+
+The null hypothesis of the Kruskal-Wallis test is that the medians are the same across all groups. As **p \< 0.05**, there is sufficient evidence to reject the null hypothesis and so at least one species has a different median culmen length.
+
+2.3.3 Dunn test
+
+Now it is has been established that at least one species has a significantly different median culmen length, pairwise interactions can be measured to determine how the culmen length individual species differ from each other. One such post-hoc test suitable for non-parametric data is the Dunn test.
+
+```{r}
+library(rstatix)
+
+stats_dunn <- dunn_test(data = culmen_length, culmen_length_mm ~ species, p.adjust.method = "bonferroni")
+
+stats_dunn_cleaned <- stats_dunn %>% 
+  select(-n1, -n2, -statistic, -p)
+
+stats_dunn_cleaned
+```
+
 #### 2.4 Results & Discussion
+
+```{r}
+library(ggpubr)
+
+stats_dunn_annotation <- stats_dunn %>% 
+    add_xy_position(x = "species")
+
+culmen_length_violinplot <- ggplot(
+  data = penguins_clean %>% drop_na(),
+  aes(x = species,
+      y = culmen_length_mm)) +
+  geom_violin(
+    aes(colour = species, fill = species),
+    draw_quantiles = c(0.25, 0.5, 0.75),
+    alpha = 0.2,
+    trim = FALSE) +
+  geom_dotplot(binaxis = "y", binwidth = 0.4, stackdir = "center",
+               color = "black",
+               fill = "white") +
+  scale_color_manual(values = species_colours) +
+  scale_fill_manual(values = species_colours) +
+  stat_pvalue_manual(stats_dunn, hide.ns = FALSE) +
+  theme_classic() +
+  labs(x = "Species", y = "Culmen Length (mm)")
+  
+
+culmen_length_violinplot
+```
 
 #### 2.5 Conclusion
 
