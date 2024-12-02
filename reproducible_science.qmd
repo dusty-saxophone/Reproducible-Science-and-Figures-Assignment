@@ -40,24 +40,88 @@ write_csv(penguins_clean, here("data", "penguins_clean.csv"))
 
 ### Question 1: Data Visualisation for Science Communication
 
-#### a) Provide your figure here:
+#### 1.1 Provide your figure here:
 
-#### b) Write about how your design choices mislead the reader about the underlying data (100-300 words)
+#### 1.2 Write about how your design choices mislead the reader about the underlying data (100-300 words)
 
 ### 
 
 ### Question 2: Data Pipeline
 
-#### Introduction
+#### 2.1 Introduction
 
-The Palmer Penguins dataset contains information about 3 different penguin species (Adelie, Chinstrap, and Gentoo) which inhabit 3 islands (Biscoe, Dream, and Torgersen) of the Palmer Archipelago in Antarctica. The dataset contains information about individual penguins, including species and the island they are found on. It also includes phenotypic information like sex, morphological measurements, and reproductive information.
+The Palmer Penguins dataset contains information about 3 different penguin species (Adelie, Chinstrap, and Gentoo) which inhabit 3 islands (Biscoe, Dream, and Torgersen) of the Palmer Archipelago in Antarctica. The dataset contains information about individual penguins, including their species and the island they are found on. It also includes phenotypic information like sex, morphological measurements, and reproductive information. I will be exploring this dataset for results of statistical significance.
 
-#### Hypothesis
+#### 2.2 Hypothesis
 
-#### Statistical methods
+Before making any hypothesis, it is vital to explore the raw data to look for any patterns of particular biological interest:
 
-#### Results & Discussion
+Exploratory figure to investigate culmen length:
 
-#### Conclusion
+```{r}
+culmen_length <- penguins_clean %>%
+  select(species, culmen_length_mm) %>% 
+  remove_NA()
+
+# removing NA values from culmen length column
+```
+
+```{r}
+species_colours <- c("Adelie" = "darkorange",
+                     "Chinstrap" = "purple",
+                     "Gentoo" = "cyan4")
+# matching species with the colours of the dataset
+
+culmen_length_violinplot <- ggplot(
+  data = penguins_clean %>% drop_na(),
+  aes(x = species,
+      y = culmen_length_mm)) +
+  geom_violin(
+    aes(colour = species, fill = species),
+    draw_quantiles = c(0.25, 0.5, 0.75),
+    alpha = 0.2,
+    trim = FALSE) +
+  coord_flip() +
+  geom_jitter(position = position_jitter(0.2, seed = 0),
+              shape = 21,
+              color = "black",
+              fill = "white",
+              size = 0.5) +
+  scale_color_manual(values = species_colours) +
+  scale_fill_manual(values = species_colours) +
+  facet_grid(rows = vars(sex)) + 
+  labs(x = "Species", y = "Culmen Length (mm)") +
+  theme_bw()
+
+culmen_length_violinplot
+```
+
+::: {.callout-note icon="false"}
+## Hypotheses
+
+Looking at the data on culmen length it would be interesting to determine whether different species have significant differences.
+
+Null hypothesis - No difference in culmen length between species
+
+Alternative hypothesis - there is a significant difference in culmen length between species
+:::
+
+#### 2.3 Statistical methods
+
+2.3.1 Shapiro-Wilk test for normality
+
+```{r}
+shapiro_test <- shapiro.test(culmen_length$culmen_length_mm)
+
+shapiro_test
+```
+
+The null hypothesis of the Shapiro-Wilk test is the data is drawn from a normally distributed population. As **p \< 0.05** there is sufficient evidence to reject the null hypothesis and so culmen length is **not normally distributed**.
+
+This can be visualised using a qqplot:
+
+#### 2.4 Results & Discussion
+
+#### 2.5 Conclusion
 
 ### Question 3: Open Science
