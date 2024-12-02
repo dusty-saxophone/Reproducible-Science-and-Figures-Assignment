@@ -6,23 +6,25 @@ editor: visual
 
 ### Data preparation:
 
-```{r}
+```{r, message=FALSE}
 library(tidyverse)
 library(palmerpenguins)
 library(janitor)
 library(here)
 library(ggplot2)
+library(rstatix)
+library(ggpubr)
 
 source(here("functions", "cleaning.R"))
 ```
 
-#### Loading the data:
+Loading the data:
 
 ```{r}
 write.csv(penguins_raw, here("data", "penguins_raw.csv"))
 ```
 
-#### Cleaning the data:
+Cleaning the data:
 
 ```{r}
 penguins_clean <- penguins_raw %>%
@@ -32,7 +34,7 @@ penguins_clean <- penguins_raw %>%
   remove_empty_columns_rows()
 ```
 
-#### Saving the cleaned data:
+Saving the cleaned data:
 
 ```{r}
 write_csv(penguins_clean, here("data", "penguins_clean.csv"))
@@ -41,6 +43,18 @@ write_csv(penguins_clean, here("data", "penguins_clean.csv"))
 ### Question 1: Data Visualisation for Science Communication
 
 #### 1.1 Provide your figure here:
+
+```{r}
+body_mass_vs_flipper_length <- penguins_clean %>% 
+  select(species, body_mass_g, flipper_length_mm) %>% 
+  remove_NA()
+
+bm_vs_fl_scatterplot <- ggplot(data = body_mass_vs_flipper_length,
+       aes(x = body_mass_g, y = flipper_length_mm)) +
+  geom_point(aes(colour = species, fill = species))
+
+bm_vs_fl_scatterplot
+```
 
 #### 1.2 Write about how your design choices mislead the reader about the underlying data (100-300 words)
 
@@ -140,8 +154,6 @@ The null hypothesis of the Kruskal-Wallis test is that the medians are the same 
 Now it is has been established that at least one species has a significantly different median culmen length, pairwise interactions can be measured to determine how the culmen length individual species differ from each other. One such post-hoc test suitable for non-parametric data is the Dunn test.
 
 ```{r}
-library(rstatix)
-
 stats_dunn <- dunn_test(data = culmen_length, culmen_length_mm ~ species, p.adjust.method = "bonferroni")
 
 stats_dunn_cleaned <- stats_dunn %>% 
@@ -150,11 +162,11 @@ stats_dunn_cleaned <- stats_dunn %>%
 stats_dunn_cleaned
 ```
 
+Using the Dunn test, each pairwise comparison is its own hypothesis test. For each pair, the null hypothesis is that there is no difference between the medians. Multiple simultaneous hypothesis tests require a p-value adjustment to reduce Type I error - in this case the Bonferroni correction is used.
+
 #### 2.4 Results & Discussion
 
 ```{r}
-library(ggpubr)
-
 stats_dunn_annotation <- stats_dunn %>% 
     add_xy_position(x = "species")
 
@@ -167,12 +179,10 @@ culmen_length_violinplot <- ggplot(
     draw_quantiles = c(0.25, 0.5, 0.75),
     alpha = 0.2,
     trim = FALSE) +
-  geom_dotplot(binaxis = "y", binwidth = 0.4, stackdir = "center",
-               color = "black",
-               fill = "white") +
+  geom_dotplot(binaxis = "y", binwidth = 0.4, stackdir = "center", color = "black", fill = "white") +
   scale_color_manual(values = species_colours) +
   scale_fill_manual(values = species_colours) +
-  stat_pvalue_manual(stats_dunn, hide.ns = FALSE) +
+  stat_pvalue_manual(stats_dunn_annotation, hide.ns = FALSE) +
   theme_classic() +
   labs(x = "Species", y = "Culmen Length (mm)")
   
@@ -180,6 +190,10 @@ culmen_length_violinplot <- ggplot(
 culmen_length_violinplot
 ```
 
+This results figure clearly shows the pairwise comparisons and their significance from the Dunn test. Adelie penguins and Chinstrap penguins have a significantly different culmen lengths, as do Adelie compared with Gentoo. This is shown by the very small p-values represented by '\*\*\*\*'. There is also no significant difference between culmen lengths of Chinstrap compared to Gentoo penguins.
+
 #### 2.5 Conclusion
+
+?????
 
 ### Question 3: Open Science
