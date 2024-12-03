@@ -65,7 +65,8 @@ ggsave(here("figures", "bm_vs_fl_vector.svg"),
        plot = bm_vs_fl_scatterplot,
        device = svglite,
        width = 20,
-       height = 20)
+       height = 20,
+       scaling = 2)
 
 ```
 
