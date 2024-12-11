@@ -45,19 +45,20 @@ write_csv(penguins_clean, here("data", "penguins_clean.csv"))
 
 ### Question 1: Data Visualisation for Science Communication
 
-#### 1.1 Provide your figure here:
+#### 1.1 Misleading figure:
 
 ```{r, message=FALSE}
 body_mass_vs_flipper_length <- penguins_clean %>% 
-  select(species, body_mass_g, flipper_length_mm) %>% 
+  select(species, body_mass_g, flipper_length_mm) %>%
   remove_NA()
 
 bm_vs_fl_scatterplot <- ggplot(data = body_mass_vs_flipper_length,
        aes(x = body_mass_g, y = flipper_length_mm)) +
   geom_point(aes(colour = species, fill = species), alpha = 0.25) +
-  geom_smooth(aes(colour = species), method = "lm", se = FALSE) +
-  scale_x_continuous(limits = (c(2000,7000))) +
-  scale_y_continuous(limits = (c(100,300)))
+  geom_smooth(aes(colour = species), method = "lm", se = FALSE) + # adding lines of best fit
+  scale_x_continuous(limits = (c(2000,7000))) + # manually changing x axis scale
+  scale_y_continuous(limits = (c(100,300))) + # manually changing y axis scale
+  theme(legend.title = element_blank()) # removal of legend title
 
 bm_vs_fl_scatterplot
 ```
@@ -76,6 +77,8 @@ ggsave(here("figures", "bm_vs_fl_vector.svg"),
 
 #### 1.2 Write about how your design choices mislead the reader about the underlying data (100-300 words)
 
+All the data on this graph is correct, however, the design choices mean that the data is presented extremely poorly. The axis labels are not in a readable format as they have been left in the "snake case" format used in the data table. The axis ranges are unnecessarily large which masks the true distribution of the underlying data as the points are too close together. The legend has no title and it is unclear what the three categorical variables mean. Furthermore, the colours of three species makes it difficult to tell which data point belongs to which species, and makes it particularly difficult for colour blind people. Combining this with the high point transparency and the grey background it makes the distribution very difficult to discern. Finally, the lines or best fit for each species are not particularly clear and are not shown with any p-values or confidence intervals from the linear models.
+
 ### Question 2: Data Pipeline
 
 #### 2.1 Introduction
@@ -90,7 +93,7 @@ Exploratory figure to investigate culmen length:
 
 ```{r}
 culmen_length <- penguins_clean %>%
-  select(species, culmen_length_mm) %>% 
+  select(species, culmen_length_mm) %>% # selecting required variables
   remove_NA()
 
 # removing NA values from culmen length column
@@ -110,18 +113,18 @@ exploring_culmen_length <- ggplot(
       y = culmen_length_mm)) +
   geom_violin(
     aes(colour = species, fill = species),
-    draw_quantiles = c(0.25, 0.5, 0.75),
+    draw_quantiles = c(0.25, 0.5, 0.75), # addition of medians and quartiles
     alpha = 0.2,
     trim = FALSE) +
   coord_flip() +
-  geom_jitter(position = position_jitter(0.2, seed = 0),
+  geom_jitter(position = position_jitter(0.2, seed = 0), # set seed for reproducibility
               shape = 21,
               color = "black",
               fill = "white",
               size = 0.5) +
   scale_color_manual(values = species_colours) +
   scale_fill_manual(values = species_colours) +
-  facet_grid(rows = vars(sex)) + 
+  facet_grid(rows = vars(sex)) + # grouping plots by sex
   labs(x = "Species", y = "Culmen Length (mm)") +
   theme_bw()
 
@@ -188,7 +191,7 @@ Using the Dunn test, each pairwise comparison is its own hypothesis test. For ea
 
 ```{r}
 stats_dunn_annotation <- stats_dunn %>% 
-    add_xy_position(x = "species")
+    add_xy_position(x = "species") # annotating graph with results from Dunn test
 
 culmen_length_violinplot <- ggplot(
   data = penguins_clean %>% drop_na(),
@@ -214,7 +217,7 @@ This results figure clearly shows the pairwise comparisons and their significanc
 
 #### 2.5 Conclusion
 
-?????
+We can conclude from the statistical analysis that culmen length differs among the three species, and specifically that there is difference between Adelie penguins compared with both Chinstrap and Gentoo. More research is required to determine the biological significance of this, as it may be due to scaling with body size or the different beak lengths could be a specific selective advantage.
 
 ### Question 3: Open Science
 
