@@ -1,6 +1,7 @@
 ---
 title: "Reproducible Science and Figures Assignment"
 format: html
+embed-resources: true
 editor: visual
 ---
 
@@ -46,14 +47,17 @@ write_csv(penguins_clean, here("data", "penguins_clean.csv"))
 
 #### 1.1 Provide your figure here:
 
-```{r}
+```{r, message=FALSE}
 body_mass_vs_flipper_length <- penguins_clean %>% 
   select(species, body_mass_g, flipper_length_mm) %>% 
   remove_NA()
 
 bm_vs_fl_scatterplot <- ggplot(data = body_mass_vs_flipper_length,
        aes(x = body_mass_g, y = flipper_length_mm)) +
-  geom_point(aes(colour = species, fill = species))
+  geom_point(aes(colour = species, fill = species), alpha = 0.25) +
+  geom_smooth(aes(colour = species), method = "lm", se = FALSE) +
+  scale_x_continuous(limits = (c(2000,7000))) +
+  scale_y_continuous(limits = (c(100,300)))
 
 bm_vs_fl_scatterplot
 ```
@@ -213,3 +217,13 @@ This results figure clearly shows the pairwise comparisons and their significanc
 ?????
 
 ### Question 3: Open Science
+
+#### 3.1 GitHub link
+
+<https://github.com/dusty-saxophone/Reproducible-Science-and-Figures-Assignment>
+
+#### 3.2 Partner's GitHub link
+
+#### 3.3 Reflection on partner's code
+
+#### 3.4 Reflection on my code
